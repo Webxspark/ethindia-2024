@@ -1,6 +1,6 @@
 
 
-const NavBar = () => {
+const LandingNav = () => {
     return (
         <div className={'flex absolute items-center justify-between px-10 z-10 py-6'}>
             <div className="text-white">ABC</div>
@@ -8,4 +8,4 @@ const NavBar = () => {
     );
 };
 
-export default NavBar;
+export default LandingNav;
