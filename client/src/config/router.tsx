@@ -3,15 +3,13 @@ import App from "@/App.tsx";
 import LandingPage from "@/pages/LandingPage.tsx";
 import DashboardLayout from "@/layouts/dashboard-layout.tsx";
 import HomePage from "@/pages/HomePage";
-
+import NewCoinPage from "@/pages/NewCoinPage";
+import MarketplacePage from "@/pages/MarketPlacePage";
+import ProfilePage from "@/pages/ProfilePage";
 const router = createBrowserRouter([
     {
         path: "/",
         element: <App />
-    },
-    {
-        path: "/home",
-        element: <HomePage />
     },
     {
         path: "/landing",
@@ -23,11 +21,19 @@ const router = createBrowserRouter([
         children: [
             {
                 path: '/dashboard',
-                element: <>i'm dashboard</>
+                element: <HomePage />
+            },
+            {
+                path: "/dashboard/new-coin",
+                element: <NewCoinPage />
             },
             {
                 path: "/dashboard/marketplace",
-                element: <>i'm marketplace</>
+                element: <MarketplacePage />
+            },
+            {
+                path: "/dashboard/profile",
+                element: <ProfilePage />
             }
         ]
     }

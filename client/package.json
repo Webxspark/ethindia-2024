@@ -11,6 +11,10 @@
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.1.0",
+    "@starknet-react/chains": "0.1.5",
+    "@starknet-react/core": "2.2.3",
+    "@tabler/icons-react": "^3.24.0",
+    "@twa-dev/sdk": "^8.0.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^11.13.1",
@@ -18,7 +22,11 @@
     "mini-svg-data-uri": "^1.4.4",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.0",
     "react-router-dom": "^7.0.2",
+    "react-toastify": "^10.0.6",
+    "starknet": "^6.11.0",
+    "starknetkit": "1.1.9",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7"
   },

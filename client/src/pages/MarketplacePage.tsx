@@ -1,13 +1,10 @@
-
-
-function HomePage() {
+function MarketplacePage() {
   return (
     <div className=" dark:bg-grid-white/[0.02] ">
       <div className=" w-full flex md:items-center md:justify-center  antialiased relative overflow-hidden">
-        
         <div className=" p-4 max-w-7xl  mx-auto relative z-10  w-full pt-20 md:pt-0">
           <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white bg-opacity-50">
-            Spotlight <br /> is the new trend.
+            Marketplace <br /> page.
           </h1>
           <p className="mt-4 font-normal text-base dark:text-neutral-300 text-zinc-800 max-w-lg text-center mx-auto">
             Spotlight effect is a great way to draw attention to a specific part
@@ -21,4 +18,4 @@ function HomePage() {
   );
 }
 
-export default HomePage;
+export default MarketplacePage;

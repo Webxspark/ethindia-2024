@@ -8,7 +8,7 @@ function App() {
   useEffect(() => {
     const isMobile = window.innerWidth <= 768
     if (isMobile) {
-      navigate('/home')
+      navigate('/dashboard')
     } else {
       navigate('/landing')
     }
