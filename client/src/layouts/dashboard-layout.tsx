@@ -2,16 +2,17 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import DashboardNav from "@/components/core/main-nav";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { Home, Plus, Store, User } from "lucide-react";
-import { useAccount } from "@starknet-react/core";
 import { useEffect } from "react";
 import { toast } from "react-toastify";
+import {getAccount} from "@wagmi/core";
+import {config} from "@/config/wallet-config.ts";
 
 const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const parent = location.pathname.split("/")[2] || "dashboard";
 
-  const { address } = useAccount();
+  const { address } = getAccount(config);
 
   useEffect(() => {
     if(parent !== "dashboard" && !address) {

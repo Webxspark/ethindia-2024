@@ -4,8 +4,8 @@ import LandingPage from "@/pages/LandingPage.tsx";
 import DashboardLayout from "@/layouts/dashboard-layout.tsx";
 import HomePage from "@/pages/HomePage";
 import NewCoinPage from "@/pages/NewCoinPage";
-import MarketplacePage from "@/pages/MarketPlacePage";
 import ProfilePage from "@/pages/ProfilePage";
+import MarketplacePage from "@/pages/MarketplacePage.tsx";
 const router = createBrowserRouter([
     {
         path: "/",

@@ -1,9 +1,10 @@
 import { useUser } from "@/context/UserContext";
-import { useAccount } from "@starknet-react/core";
+import {useAccount} from "wagmi";
+import {config} from "@/config/wallet-config.ts";
 
 function ProfilePage() {
   const { userData, isTeleInterface } = useUser();
-  const { address } = useAccount();
+  const { address } = useAccount(config);
 
   return (
     <div className="dark:bg-grid-white/[0.02]">

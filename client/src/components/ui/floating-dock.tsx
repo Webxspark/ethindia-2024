@@ -17,7 +17,7 @@ export const FloatingDock = ({
 }: {
   items: { title: string; icon: React.ReactNode; href: string }[];
   className?: string;
-  parent?: "dashboard" | "marketplace" | "new-coin" | "profile";
+  parent?: "dashboard" | "marketplace" | "new-coin" | "profile" | string;
 }) => {
   return (
     <>
