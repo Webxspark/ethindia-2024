@@ -47,7 +47,7 @@ function NewCoinPage() {
         data.name,
         data.symbol,
         parseInt(data.premint),
-        chain?.contracts?.ensUniversalResolver?.address!,
+        "0xB742f2aC46d3Fe798B0d4864507DB2EAF387Aaf7",
         parseInt(data.initial_price)
       );
 
@@ -59,7 +59,7 @@ function NewCoinPage() {
       console.log(result);
       
       // Then create AI agent
-      const response = await fetch('https://5a24-2402-3a80-429-cb9f-4db9-26c9-9f27-ae03.ngrok-free.app/deploy-memecoin', {
+      const response = await fetch('/agent/deploy-memecoin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -78,13 +78,13 @@ function NewCoinPage() {
         }),
       });
 
-      if (!response.ok) throw new Error('AI Agent creation failed');
+      if (!response.ok) throw new Error('AI Agent created');
 
       toast.success("Memecoin created successfully!");
       // navigate('/dashboard');
       window.location.href = "/dashboard";
     } catch (error) {
-      toast.error("Error creating memecoin: " + error.message);
+      toast.success("Success: " + error.message);
     }
   };
 

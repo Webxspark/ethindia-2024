@@ -29,6 +29,8 @@ useEffect(() => {
         setView("content");
       }
     });
+  } else {
+    setView("login")
   }
 }, [address, isConnected]);
 
@@ -57,6 +59,11 @@ useEffect(() => {
         </div>
         || view === 'content' && <Outlet />
         || view == "signup" && <SignUpComp />
+        || view === "login" && <div>
+          <div className="flex justify-center items-center h-96">
+            <h1 className="text-2xl font-bold">Please connect your wallet</h1>
+          </div>
+        </div>
       }
       <FloatingDock
         items={items}
