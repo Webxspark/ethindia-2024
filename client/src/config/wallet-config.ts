@@ -1,12 +1,13 @@
 import {getDefaultConfig} from "@rainbow-me/rainbowkit";
-import {baseSepolia, polygonZkEvmCardona} from 'wagmi/chains';
+import {baseSepolia, polygonZkEvmCardona, sepolia} from 'wagmi/chains';
 import {http} from "@wagmi/core"
 
 export const config = getDefaultConfig({
     appName: 'My RainbowKit App',
     projectId: 'YOUR_PROJECT_ID',
-    chains: [baseSepolia, polygonZkEvmCardona],
+    chains: [sepolia,baseSepolia, polygonZkEvmCardona],
     transports: {
+        [sepolia.id]: http(),
         [baseSepolia.id]: http(),
         [polygonZkEvmCardona.id]: http(),
     },

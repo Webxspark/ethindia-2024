@@ -1,5 +1,5 @@
 const factoryAddress = "0xE0BDe726D897C70B144E9698a3224c1F78576A46";
-
+const AppName = "MemeCoinFactory";
 const contractABI = [
   {
     anonymous: false,
@@ -309,4 +309,4 @@ const contractABI = [
   },
 ];
 
-export { factoryAddress, contractABI };
+export { factoryAddress, contractABI, AppName };

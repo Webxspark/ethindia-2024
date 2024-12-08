@@ -2,17 +2,35 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import DashboardNav from "@/components/core/main-nav";
 import { FloatingDock } from "@/components/ui/floating-dock";
 import { Home, Plus, Store, User } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
-import {getAccount} from "@wagmi/core";
-import {config} from "@/config/wallet-config.ts";
+import { useAccount } from "wagmi";
+import { createUser, isUserExits } from "@/fns/web3-apis";
+import SignUpComp from "@/pages/signup";
 
 const DashboardLayout = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [view, setView] = useState("loading");
   const parent = location.pathname.split("/")[2] || "dashboard";
 
-  const { address } = getAccount(config);
+  const { address, isConnected } = useAccount();
+useEffect(() => {
+  if(isConnected === true && address !== undefined){
+    isUserExits(address).then((result) => {
+      if(result === false){
+        setView("signup");
+        createUser(address).then(response => {
+          console.log(response);
+          setView("content");
+          toast.success("Account created successfully!");
+        });
+      } else {
+        setView("content");
+      }
+    });
+  }
+}, [address, isConnected]);
 
   useEffect(() => {
     if(parent !== "dashboard" && !address) {
@@ -31,7 +49,15 @@ const DashboardLayout = () => {
   return (
     <div className={`!min-h-screen relative`}>
       <DashboardNav />
-      <Outlet />
+      {
+        view === "loading" && <div>
+          <div className="flex justify-center items-center h-96">
+            <h1 className="text-2xl font-bold">Please wait...</h1>
+          </div>
+        </div>
+        || view === 'content' && <Outlet />
+        || view == "signup" && <SignUpComp />
+      }
       <FloatingDock
         items={items}
         className="fixed bottom-0 z-100 shadow-xs"

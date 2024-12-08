@@ -18,3 +18,21 @@ export interface UserData {
 //   referralCode: "ABC123",
 //   referrals: [],
 // };
+
+export interface CharacterSketch {
+  bio: string[];
+  topics: string[];
+  adjectives: string[];
+}
+
+export interface MemeForm {
+  name: string;
+  symbol: string;
+  premint: string;
+  initial_price: string;
+  twitterUsername: string;
+  twitterPassword: string;
+  twitterEmail: string;
+  gender: 'male' | 'female';
+  characterSketch: CharacterSketch;
+}

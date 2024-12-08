@@ -1,195 +1,286 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { useFieldArray, useForm } from "react-hook-form";
+import { toast } from "react-toastify";
+import { useAccount } from "wagmi";
+import { Plus, X, ArrowRight, ArrowLeft } from "lucide-react";
+import { addCoin, waitForTransaction } from "@/fns/web3-apis";
+import { MemeForm } from "@/lib/types";
+import { useNavigate } from "react-router-dom";
+import { waitForTransactionReceipt } from "@wagmi/core";
+import { config } from "@/config/wallet-config";
 
 function NewCoinPage() {
   const [step, setStep] = useState(1);
-  const [isCloning, setIsCloning] = useState(false);
-  const { register, handleSubmit, watch, reset } = useForm();
+  const { address, chain } = useAccount();
+  // const { navigate } = useNavigate();
+  
+  const { register, control, handleSubmit, watch, formState: { errors } } = useForm<MemeForm>({
+    defaultValues: {
+      characterSketch: {
+        bio: [""],
+        topics: [""],
+        adjectives: [""]
+      }
+    }
+  });
 
-  const onSubmit = (data) => {
-    console.log(data);
-    toast.success("Form submitted successfully!");
-    reset();
-    setStep(1);
+  const { fields: bioFields, append: appendBio, remove: removeBio } = useFieldArray({
+    control,
+    name: "characterSketch.bio"
+  });
+
+  const { fields: topicFields, append: appendTopic, remove: removeTopic } = useFieldArray({
+    control,
+    name: "characterSketch.topics"
+  });
+
+  const { fields: adjectiveFields, append: appendAdjective, remove: removeAdjective } = useFieldArray({
+    control,
+    name: "characterSketch.adjectives"
+  });
+
+  const onSubmit = async (data: MemeForm) => {
+    try {
+      // First deploy the contract
+      const hash = await addCoin(
+        address!,
+        data.name,
+        data.symbol,
+        parseInt(data.premint),
+        chain?.contracts?.ensUniversalResolver?.address!,
+        parseInt(data.initial_price)
+      );
+
+      // await waitForTransaction(hash);
+     const result = await waitForTransactionReceipt(config, {
+        hash: hash
+      });
+
+      console.log(result);
+      
+      // Then create AI agent
+      const response = await fetch('https://5a24-2402-3a80-429-cb9f-4db9-26c9-9f27-ae03.ngrok-free.app/deploy-memecoin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          characterSketch: {
+            bio: data.characterSketch.bio.filter(Boolean),
+            topics: data.characterSketch.topics.filter(Boolean),
+            adjectives: data.characterSketch.adjectives.filter(Boolean)
+          },
+          name: data.name,
+          twitterEmail: data.twitterEmail,
+          twitterPassword: data.twitterPassword,
+          twitterUsername: data.twitterUsername,
+          gender: data.gender
+        }),
+      });
+
+      if (!response.ok) throw new Error('AI Agent creation failed');
+
+      toast.success("Memecoin created successfully!");
+      // navigate('/dashboard');
+      window.location.href = "/dashboard";
+    } catch (error) {
+      toast.error("Error creating memecoin: " + error.message);
+    }
   };
 
-  const handleNextStep = () => {
-    setStep(step + 1);
-  };
-
-  const handlePreviousStep = () => {
-    setStep(step - 1);
-  };
+  const renderDynamicFields = (
+    fields: any[],
+    append: () => void,
+    remove: (index: number) => void,
+    name: string,
+    placeholder: string
+  ) => (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label className="text-lg font-semibold text-gray-700 dark:text-neutral-300 capitalize">
+          {name}
+        </label>
+        <button
+          type="button"
+          onClick={() => append()}
+          className="p-2 rounded-full bg-purple-500 hover:bg-purple-600 text-white transition-colors"
+        >
+          <Plus size={16} />
+        </button>
+      </div>
+      {fields.map((field, index) => (
+        <div key={field.id} className="flex items-center gap-2">
+          <input
+            {...register(`characterSketch.${name}.${index}` as any)}
+            className="flex-1 p-2 border border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
+            placeholder={placeholder}
+          />
+          {index > 0 && (
+            <button
+              type="button"
+              onClick={() => remove(index)}
+              className="p-2 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
-    <div className="dark:bg-grid-white/[0.02]">
+    <div className="dark:bg-grid-white/[0.02] min-h-screen">
       <div className="w-full max-w-3xl p-4 mx-auto relative z-10">
-        <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white bg-opacity-50">
-          New Coin Creation
-        </h1>
         <form onSubmit={handleSubmit(onSubmit)} className="mt-8 space-y-6">
+          {/* Step 1: Basic Coin Details */}
           {step === 1 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Memecoin Details</h2>
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white">
+                New Coin Creation
+              </h1>
+              
+              {/* Form fields for step 1 */}
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Name
-                  </label>
-                  <input
-                    type="text"
-                    {...register("name", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Symbol
-                  </label>
-                  <input
-                    type="text"
-                    {...register("symbol", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Premint (Total Supply)
-                  </label>
-                  <input
-                    type="number"
-                    {...register("premint", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
+                <input
+                  {...register("name", { required: true })}
+                  placeholder="Coin Name"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <input
+                  {...register("symbol", { required: true })}
+                  placeholder="Symbol"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <input
+                  {...register("premint", { required: true })}
+                  placeholder="Total Supply"
+                  type="number"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <input
+                  {...register("initial_price", { required: true })}
+                  placeholder="Initial Price"
+                  type="number"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
               </div>
-              <div className="mt-6 flex justify-end">
+              
+              <div className="flex justify-end">
                 <button
                   type="button"
-                  onClick={handleNextStep}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                 >
-                  Next
+                  Next <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           )}
 
+          {/* Step 2: Twitter Details */}
           {step === 2 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Twitter Details</h2>
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white">
+                Twitter Setup
+              </h1>
+              
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Username
-                  </label>
-                  <input
-                    type="text"
-                    {...register("twitterUsername", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    {...register("twitterPassword", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                    Email ID
-                  </label>
-                  <input
-                    type="email"
-                    {...register("twitterEmail", { required: true })}
-                    className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                  />
-                </div>
+                <input
+                  {...register("twitterUsername", { required: true })}
+                  placeholder="Twitter Username"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <input
+                  {...register("twitterPassword", { required: true })}
+                  type="password"
+                  placeholder="Twitter Password"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <input
+                  {...register("twitterEmail", { required: true })}
+                  type="email"
+                  placeholder="Email"
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                />
+                <select
+                  {...register("gender")}
+                  className="w-full p-2 border rounded-md dark:bg-neutral-800"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
               </div>
-              <div className="mt-6 flex justify-between">
+
+              <div className="flex justify-between">
                 <button
                   type="button"
-                  onClick={handlePreviousStep}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                  onClick={() => setStep(1)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                 >
-                  Previous
+                  <ArrowLeft size={16} /> Previous
                 </button>
                 <button
                   type="button"
-                  onClick={handleNextStep}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  onClick={() => setStep(3)}
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                 >
-                  Next
+                  Next <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           )}
 
+          {/* Step 3: Character Details */}
           {step === 3 && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Persona Details</h2>
-              <div className="space-y-4">
-                <div className="flex items-center">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300 mr-2">
-                    Clone a Persona
-                  </label>
-                  <input
-                    type="checkbox"
-                    {...register("isCloning")}
-                    onChange={() => setIsCloning(!isCloning)}
-                    className="h-4 w-4 text-indigo-600 border-gray-300 rounded focus:ring-indigo-500"
-                  />
-                </div>
-                {isCloning ? (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                      Twitter Profile URL
-                    </label>
-                    <input
-                      type="text"
-                      {...register("twitterProfileUrl", { required: true })}
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                    />
-                  </div>
-                ) : (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-neutral-300">
-                      Character Sketch
-                    </label>
-                    <textarea
-                      {...register("characterSketch", { required: true })}
-                      className="mt-1 block w-full p-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 dark:bg-neutral-800 dark:border-neutral-700 dark:text-white"
-                      rows={5}
-                    />
-                  </div>
-                )}
-              </div>
-              <div className="mt-6 flex justify-between">
+            <div className="space-y-6">
+              <h1 className="text-4xl md:text-7xl font-bold text-center bg-clip-text text-transparent bg-gradient-to-b from-neutral-900 to-neutral-700 dark:from-neutral-600 dark:to-white">
+                AI Persona
+              </h1>
+
+              {renderDynamicFields(
+                bioFields,
+                () => appendBio(""),
+                removeBio,
+                "bio",
+                "Add a bio line..."
+              )}
+
+              {renderDynamicFields(
+                topicFields,
+                () => appendTopic(""),
+                removeTopic,
+                "topics",
+                "Add a topic..."
+              )}
+
+              {renderDynamicFields(
+                adjectiveFields,
+                () => appendAdjective(""),
+                removeAdjective,
+                "adjectives",
+                "Add an adjective..."
+              )}
+
+              <div className="flex justify-between">
                 <button
                   type="button"
-                  onClick={handlePreviousStep}
-                  className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                  onClick={() => setStep(2)}
+                  className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700"
                 >
-                  Previous
+                  <ArrowLeft size={16} /> Previous
                 </button>
                 <button
                   type="submit"
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600"
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700"
                 >
-                  Submit
+                  Create Memecoin <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           )}
         </form>
       </div>
-      <ToastContainer />
     </div>
   );
 }

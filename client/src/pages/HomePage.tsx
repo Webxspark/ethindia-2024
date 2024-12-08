@@ -2,7 +2,7 @@
 
 function HomePage() {
   return (
-    <div className=" dark:bg-grid-white/[0.02] ">
+    <div className=" dark:bg-grid-white/[0.02] mt-20">
       <div className=" w-full flex md:items-center md:justify-center  antialiased relative overflow-hidden">
         
         <div className=" p-4 max-w-7xl  mx-auto relative z-10  w-full pt-20 md:pt-0">
