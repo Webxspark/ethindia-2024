@@ -1,6 +1,7 @@
 import Logo from "@/components/assets/logo.tsx";
 import ThemeSwitcher from "../ui/theme-switcher";
 import {ConnectButton} from "@rainbow-me/rainbowkit";
+import ArgnetWallet from "../ui/argnet-wallet";
 
 
 const DashboardNav = ({
@@ -19,8 +20,9 @@ const DashboardNav = ({
             </div>
             <div className={"flex items-center gap-5 text-white"}>
                 <ConnectButton/>
+                {/* <ArgnetWallet /> */}
             </div>
-        </div>
+       </div>
     );
 };
 
